@@ -1,12 +1,4 @@
-function openPage(pageName) {
-  var i, tabcontent;
-  tabcontent = document.getElementsByClassName("tabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
-  document.getElementById(pageName).style.display = "flex";
-}
-let sideMenu = async () => {
+let fetchingData = async () => {
   await fetch("location.json")
     .then((res) => {
       return res.json();
@@ -16,7 +8,7 @@ let sideMenu = async () => {
       tabHeader(data)
     });
 };
-sideMenu();
+fetchingData();
 
 
 function tabHeader(data) {
@@ -26,7 +18,7 @@ function tabHeader(data) {
     button.setAttribute("class", "tablink")
     button.setAttribute("onclick", `openPage("${value.subcontinent}")`)
     value.subcontinent === "South Asia" && button.setAttribute("id", "defaultOpen")
-    value.subcontinent === "South Asia" && button.setAttribute("class"," tablink tablink--active")
+    value.subcontinent === "South Asia" && button.setAttribute("class", " tablink tablink--active")
     button.innerHTML = value.subcontinent;
     button.setAttribute("onclick", "officeAddress(this.innerHTML)");
     parent.appendChild(button)
@@ -51,19 +43,24 @@ function continentAddress(data) {
   subContinents.setAttribute("id", `${data.subcontinent}`);
   subContinents.setAttribute("class", "tabcontent")
   parent.replaceChildren(subContinents);
+
   const address = document.createElement("div");
   address.setAttribute("class", "tabcontent-adresses");
   address.setAttribute("onmouseout", "imagedefault(this)");
   subContinents.appendChild(address);
-  data.places.forEach((item) => {
+
+  let addressArray = data.places;
+  addressArray.forEach((item) => {
     const regionBox = document.createElement("div");
     regionBox.setAttribute("class", "regions");
+    addressArray.indexOf(item) === 0 && regionBox.setAttribute("class", "regions borderDefault");
     regionBox.setAttribute("onmouseover", "locationImageChange(this)");
     regionBox.setAttribute("data-officeimg_link", `${item.location_image}`);
     address.appendChild(regionBox);
     const regionBoxName = document.createElement("h3");
     regionBoxName.innerHTML = item.place;
     regionBox.appendChild(regionBoxName);
+
     Object.keys(item.address).forEach((lines) => {
       const regionBoxLines = document.createElement("p");
       regionBoxLines.innerHTML = item.address[lines];
@@ -85,7 +82,10 @@ function continentAddress(data) {
       subContinents.appendChild(locationImage);
     }
   })
+  defaultBorder()
+  defaultBorderOut()
 }
+
 
 
 
@@ -96,6 +96,7 @@ function locationImageChange(regionTag) {
   imgBox.replaceChildren(img);
 }
 
+
 function imagedefault(region) {
   const imageBox = document.querySelector(".tabcontent-img");
   const boxes = region.querySelector(".regions");
@@ -104,21 +105,47 @@ function imagedefault(region) {
   imageBox.replaceChildren(img);
 }
 
+
 function defaultTag() {
-  document.querySelectorAll(".tablink").forEach(button => { 
+  const tab = document.querySelectorAll(".tablink")
+  tab.forEach(button => {
     button.addEventListener("click", () => {
-      console.log(button)
       const tabBar = button.parentElement;
-      console.log(tabBar)
-      
       tabBar.querySelectorAll(".tablink").forEach(button => {
-        console.log(button)
         button.classList.remove("tablink--active")
       });
       button.classList.add("tablink--active")
     });
-    
-  });
 
+  });
 }
-defaultTag()
+
+
+function defaultBorder() {
+  const tab = document.querySelectorAll(".regions")
+  tab.forEach(button => {
+    button.addEventListener("mouseover", () => {
+      const tabBar = button.parentElement;
+      tabBar.querySelectorAll(".regions").forEach(button => {
+        button.classList.remove("borderDefault")
+      });
+      button.classList.add("borderDefault")
+    });
+
+  });
+}
+
+function defaultBorderOut() {
+  const tab = document.querySelectorAll(".regions")
+  tab.forEach(button => {
+    button.addEventListener("mouseleave", () => {
+      const tabBar = button.parentElement;
+      tabBar.querySelectorAll(".regions").forEach(button => {
+        button.classList.remove("borderDefault")
+      });
+      tab[0].classList.add("borderDefault")
+    });
+
+  });
+}
+
